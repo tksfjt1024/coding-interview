@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_HOST_NAME: localhost
+      POSTGRES_DB: coding-test
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: coding-test
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U root -d coding-test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pipenv
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: pipenv install --deploy --dev
+
+      - name: Format check (ruff)
+        run: pipenv run ruff format --check .
+
+      - name: Lint (ruff)
+        run: pipenv run ruff check .
+
+      - name: Type check (mypy)
+        run: pipenv run mypy .
+
+      - name: Check migrations are up to date
+        run: pipenv run python manage.py makemigrations --check --dry-run
+
+      - name: Test
+        run: pipenv run python manage.py test api
