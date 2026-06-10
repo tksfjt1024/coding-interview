@@ -9,6 +9,10 @@ djangorestframework = "==3.14.0"
 psycopg2 = "==2.9.12"
 
 [dev-packages]
+ruff = "*"
+mypy = "*"
+django-stubs = {version = "==4.2.7", extras = ["compatible-mypy"]}
+djangorestframework-stubs = {version = "==3.14.5", extras = ["compatible-mypy"]}
 
 [requires]
 python_version = "3.11"
