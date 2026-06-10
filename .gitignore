@@ -25,6 +25,7 @@ coverage.xml
 .pytest_cache/
 cover/
 .mypy_cache
+.ruff_cache
 
 # Django stuff:
 *.log
